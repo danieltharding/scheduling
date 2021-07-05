@@ -3,6 +3,7 @@ backcall==0.2.0
 click==8.0.1
 decorator==5.0.9
 Flask==2.0.1
+gunicorn==20.1.0
 igraph==0.1.11
 ipython==7.25.0
 ipython-genutils==0.2.0
