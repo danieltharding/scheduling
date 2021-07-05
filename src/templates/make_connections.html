@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block head %}
+    <title>Ordering</title>
+{% endblock %}
+{% block content %}
+    <h1>Does option 1 lead to option 2?</h1>
+    <div>
+      <p>{{ first }}</p>
+      <p>{{ second  }}</p>
+    </div>
+    <form method="post" action="/links">
+        <input type="submit"  name="yes" value="yes">
+        <input type="submit" name="no" value="no">
+    </form>
+{% endblock %}

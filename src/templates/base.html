@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/tasks">Adding tasks</a>
+      <a href="/links">Adding Links</a>
+      <a href="/done">Get spreadsheet</a>
+    </nav>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

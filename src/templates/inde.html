@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block head %}
+    <title>Home</title>
+{% endblock %}
+{% block content %}
+    <h1>Home</h1>
+    <h2>Enter the name for the new task sheet you want or press the button to load a previous sheet</h2>
+    <form method="post">
+        <input type="text" name="name" id="name">
+        <input type="submit" formaction="/">
+    </form>
+{% endblock %}

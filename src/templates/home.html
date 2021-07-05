@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Adding Tasks</title>
+{% endblock %}
+{% block content %}
+    <h1>Please input your task:</h1>
+    <form method="post">
+        <input type="text" name="task" id="task">
+        <input type="submit" name="submit" id="submit" formaction="/tasks">
+    </form>
+{% endblock %}
