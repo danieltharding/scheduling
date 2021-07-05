@@ -20,6 +20,7 @@ prompt-toolkit==3.0.19
 ptyprocess==0.7.0
 Pygments==2.9.0
 python-dateutil==2.8.1
+python-igraph==0.9.6
 pytz==2021.1
 six==1.16.0
 texttable==1.6.3
