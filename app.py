@@ -20,7 +20,15 @@ def home():
 def tasks():
     if request.method == "POST":
         form = request.form
-        graph_lib.add_vertex(form['task'])
+        re = graph_lib.add_vertex(form['task'])
+        if re:
+            string = form['task'] + " was added"
+        else:
+            if form['task'] == "":
+                string = "Please enter something into the box"
+
+            else:
+                string = form['task'] + " already exists"
         return render_template("home.html")
     return render_template("home.html")
 
