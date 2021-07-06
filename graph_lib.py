@@ -12,18 +12,25 @@ sw = True
 
 
 def new_graph():
-    global g
-    g = igraph.Graph(directed=True)
+    global li, dic, index, first, second, sw
+    g.delete_vertices(igraph.VertexSeq(g))
+    li = []
+    dic = {}
+    index = 0
+    first = 0
+    second = 0
+    sw = True
 
 
 def add_vertex(name):
     global index
     if name in li or name == "":
-        return
+        return False
     dic[name] = index
     g.add_vertex(index)
     index += 1
     li.append(name)
+    return True
 
 
 def add_edge(vert_from, vert_to):

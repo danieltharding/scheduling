@@ -8,4 +8,7 @@
         <input type="text" name="task" id="task">
         <input type="submit" name="submit" id="submit" formaction="/tasks">
     </form>
+    {% if success is not none %}
+        <p>{{ success }}</p>
+    {% endif %}
 {% endblock %}
