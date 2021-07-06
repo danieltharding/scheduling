@@ -41,6 +41,8 @@ def add_edge(vert_from, vert_to):
 
 def next_pairs():
     global first, second, sw
+    if len(li) == 0 or len(li) == 1:
+        return False, "", ""
     if second + 1 == len(li):
         if first + 1 == len(li):
             return False, "", ""
