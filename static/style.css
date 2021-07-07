@@ -1,5 +1,20 @@
 nav {
+    margin-top: 2em;
+    margin-bottom: 2em;
+    text-decoration: none;
+}
+
+nav > a {
+    text-decoration: none;
+}
+
+nav > a :hover {
+    color: white;
+    text-decoration: none;
+}
+
+.cont {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
+    padding: 1em;
 }

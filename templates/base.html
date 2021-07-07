@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     {% block head %}{% endblock %}
 </head>
-<body>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/tasks">Adding tasks</a>
-      <a href="/links">Adding Links</a>
-      <a href="/done">Get spreadsheet</a>
+<body class="container">
+    <nav class="container ">
+        <div class="row justify-content-md-center">
+            <div class="col text-center">
+                <a class="btn btn-outline-success" href="/">Home</a>
+            </div>
+            <div class="col text-center">
+                <a class="btn btn-outline-success" href="/tasks">Adding tasks</a>
+            </div>
+            <div class="col text-center">
+                <a class="btn btn-outline-success" href="/links">Adding Links</a>
+            </div>
+            <div class="col text-center">
+                <a class="btn btn-outline-success" href="/done">Get spreadsheet</a>
+            </div>
+        </div>
     </nav>
-    <main>
+    <main class="container">
       {% block content %}{% endblock %}
     </main>
 </body>

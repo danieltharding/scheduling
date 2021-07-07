@@ -6,7 +6,9 @@
     <h1>Home</h1>
     <h2>Enter the name for the new task sheet you want or press the button to load a previous sheet</h2>
     <form method="post">
-        <input type="text" name="name" id="name">
-        <input type="submit" formaction="/">
+        <div class="mb-3">
+            <input type="text" name="name" id="name" class="form-control">
+        </div>
+        <input type="submit" formaction="/" class="btn btn-primary">
     </form>
 {% endblock %}

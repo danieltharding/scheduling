@@ -5,10 +5,13 @@
 {% block content %}
     <h1>Please input your task:</h1>
     <form method="post">
-        <input type="text" name="task" id="task">
-        <input type="submit" name="submit" id="submit" formaction="/tasks">
+        <div class="mb-3">
+            <input type="text" name="task" id="task" class="form-control">
+        </div>
+        {% if success is not none %}
+            <p>{{ success }}</p>
+        {% endif %}
+        <input type="submit" value="submit" name="submit" id="submit" formaction="/tasks" class="btn btn-primary">
     </form>
-    {% if success is not none %}
-        <p>{{ success }}</p>
-    {% endif %}
+
 {% endblock %}

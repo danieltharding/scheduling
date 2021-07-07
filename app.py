@@ -26,10 +26,9 @@ def tasks():
         else:
             if form['task'] == "":
                 string = "Please enter something into the box"
-
             else:
                 string = form['task'] + " already exists"
-        return render_template("home.html")
+        return render_template("home.html", success=string)
     return render_template("home.html")
 
 
@@ -37,8 +36,7 @@ def tasks():
 def link():
     global current
     if request.method == 'POST':
-        form = request.form
-        if form.get('yes'):
+        if request.form.get('yes'):
             graph_lib.add_edge(current[0], current[1])
         else:
             available, first, second = graph_lib.swap()
