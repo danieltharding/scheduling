@@ -9,6 +9,9 @@
         <div class="mb-3">
             <input type="text" name="name" id="name" class="form-control">
         </div>
+        {% if success is not none %}
+            <p>{{ success }}</p>
+        {% endif %}
         <input type="submit" formaction="/" class="btn btn-primary">
     </form>
 {% endblock %}

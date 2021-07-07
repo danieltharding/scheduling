@@ -12,6 +12,8 @@ def home():
     if request.method == "POST":
         graph_lib.new_graph()
         name = request.form['name']
+        if name == "":
+            return render_template("inde.html", success="Please enter a name into the box")
         return redirect('/tasks')
     return render_template("inde.html")
 
@@ -38,11 +40,6 @@ def link():
     if request.method == 'POST':
         if request.form.get('yes'):
             graph_lib.add_edge(current[0], current[1])
-        else:
-            available, first, second = graph_lib.swap()
-            if available:
-                current = [first, second]
-                return render_template("make_connections.html", first=first, second=second)
     next_available, first, second = graph_lib.next_pairs()
     if next_available:
         current = [first, second]

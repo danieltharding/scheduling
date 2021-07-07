@@ -6,20 +6,15 @@ g = igraph.Graph(directed=True)
 dic = {}
 li = []
 index = 0
-first = 0
-second = 0
-sw = True
+pot_edges = {}
 
 
 def new_graph():
-    global li, dic, index, first, second, sw
+    global li, dic, index
     g.delete_vertices(igraph.VertexSeq(g))
     li = []
     dic = {}
     index = 0
-    first = 0
-    second = 0
-    sw = True
 
 
 def add_vertex(name):
@@ -30,60 +25,72 @@ def add_vertex(name):
     g.add_vertex(index)
     index += 1
     li.append(name)
+    create_pot_edges()
     return True
+
+
+def create_pot_edges():
+    global pot_edges
+    hold = {}
+    vertex_set = igraph.VertexSeq(g)
+    for i in range(len(vertex_set)):
+        for j in range(i + 1, len(vertex_set)):
+            hold[(i, j)] = False
+            hold[(j, i)] = False
+    for key in pot_edges.keys():
+        hold[key] = pot_edges[key]
+    pot_edges = hold
 
 
 def add_edge(vert_from, vert_to):
     if (vert_from, vert_to) in g.get_edgelist():
         return
     g.add_edges([(dic[vert_from], dic[vert_to])])
+    pot_edges[(vert_from, vert_to)] = True
 
 
 def next_pairs():
-    global first, second, sw
-    if len(li) == 0 or len(li) == 1:
+    if len(pot_edges.keys()) == 0 or len(pot_edges.keys()) == 1:
         return False, "", ""
-    if second + 1 == len(li):
-        if first + 1 == len(li):
-            return False, "", ""
-        else:
-            first += 1
-            second = first + 1
-            if second == len(li):
-                return False, "", ""
-    else:
-        second += 1
-    while causes_cycle(first, second):
-        if not causes_cycle(second, first):
-            sw = False
-            return True, li[second], li[first]
-        if second + 1 == len(li):
-            if first + 1 == len(li):
-                return False, "", ""
-            else:
-                first += 1
-                second = first + 1
-                if second == len(li):
-                    return False, "", ""
-        else:
-            second += 1
-    sw = True
-    return True, li[first], li[second]
-
-
-def swap():
-    global first, second, sw
-    if sw and not causes_cycle(second, first):
-        sw = False
-        return True, li[second], li[first]
-    else:
-        return False, "", ""
-
+    for key in pot_edges.keys():
+        if not pot_edges[key]:
+            if not causes_cycle(key[0], key[1]):
+                return True, li[key[0]], li[key[1]]
+    return False, "", ""
+    # if len(li) == 0 or len(li) == 1:
+    #     return False, "", ""
+    # if second + 1 == len(li):
+    #     if first + 1 == len(li):
+    #         return False, "", ""
+    #     else:
+    #         first += 1
+    #         second = first + 1
+    #         if second == len(li):
+    #             return False, "", ""
+    # else:
+    #     second += 1
+    # while causes_cycle(first, second):
+    #     if not causes_cycle(second, first):
+    #         sw = False
+    #         return True, li[second], li[first]
+    #     if second + 1 == len(li):
+    #         if first + 1 == len(li):
+    #             return False, "", ""
+    #         else:
+    #             first += 1
+    #             second = first + 1
+    #             if second == len(li):
+    #                 return False, "", ""
+    #     else:
+    #         second += 1
+    # return True, li[first], li[second]
 
 def causes_cycle(i, j):
     g.add_edges([(i, j)])
     re = g.is_dag()
     g.delete_edges([(i, j)])
+    if re:
+        pot_edges[(i, j)] = True
     return not re
 
 
