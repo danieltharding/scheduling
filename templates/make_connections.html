@@ -4,12 +4,16 @@
 {% endblock %}
 {% block content %}
     <h1>Does option 1 lead to option 2?</h1>
-    <div>
-      <p>{{ first }}</p>
-      <p>{{ second  }}</p>
+    <div class="row">
+      <h3 class="col">{{ first }}</h3>
+      <h3 class="col">{{ second  }}</h3>
     </div>
-    <form method="post" action="/links">
-        <input type="submit"  name="yes" value="yes">
-        <input type="submit" name="no" value="no">
+    <form method="post" action="/links" class="row">
+        <div class="col btn btn-success">
+            <input class="text-center btn btn-success" type="submit"  name="yes" value="yes">
+        </div>
+        <div class="col btn btn-danger">
+            <input class="text-center btn btn-danger" type="submit" name="no" value="no">
+        </div>
     </form>
 {% endblock %}
