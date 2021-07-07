@@ -3,17 +3,22 @@
     <title>Ordering</title>
 {% endblock %}
 {% block content %}
-    <h1>Does option 1 lead to option 2?</h1>
-    <div class="row">
-      <h3 class="col">{{ first }}</h3>
-      <h3 class="col">{{ second  }}</h3>
-    </div>
-    <form method="post" action="/links" class="row">
-        <div class="col btn btn-success">
-            <input class="text-center btn btn-success" type="submit"  name="yes" value="yes">
+    {% if first is not none %}
+        <h1>Does option 1 lead to option 2?</h1>
+        <div class="row">
+          <h3 class="col">{{ first }}</h3>
+          <h3 class="col">{{ second  }}</h3>
         </div>
-        <div class="col btn btn-danger">
-            <input class="text-center btn btn-danger" type="submit" name="no" value="no">
-        </div>
-    </form>
+        <form method="post" action="/links" class="row">
+            <div class="col btn btn-success">
+                <input class="text-center btn btn-success" type="submit"  name="yes" value="yes">
+            </div>
+            <div class="col btn btn-danger">
+                <input class="text-center btn btn-danger" type="submit" name="no" value="no">
+            </div>
+        </form>
+    {% else %}
+        <h1>No more connections to make</h1>
+        <a href="/done" class="btn btn-success">Click here to get spreadsheet</a>
+    {% endif %}
 {% endblock %}

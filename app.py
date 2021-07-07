@@ -45,7 +45,7 @@ def link():
         current = [first, second]
         return render_template("make_connections.html", first=first, second=second)
     else:
-        return redirect('/done')
+        return render_template('make_connections.html', first=None)
 
 
 @app.route('/done')
