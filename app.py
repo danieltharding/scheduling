@@ -1,47 +1,59 @@
 from flask import Flask, render_template, request, redirect, url_for
-import graph_lib
+import requests
 
 app = Flask(__name__)
 current = []
 name = ""
+base_url = "http://localhost:8000/"
 
 
 @app.route('/', methods=['GET', 'POST'], endpoint="home")
 def home():
     global name
+    url = base_url
     if request.method == "POST":
-        graph_lib.new_graph()
         name = request.form['name']
         if name == "":
             return render_template("inde.html", success="Please enter a name into the box")
+        requests.post(url, json={"name": name, "new": True})
         return redirect('/tasks')
     return render_template("inde.html")
 
 
 @app.route('/tasks', methods=['GET', "POST"], endpoint="tasks")
 def tasks():
+    url = base_url + "add_vertex"
     if request.method == "POST":
         form = request.form
-        re = graph_lib.add_vertex(form['task'])
-        if re[0]:
+        payload = {"name": name, "vertex_name": form['task']}
+        r = requests.post(url, json=payload)
+        re = r.json()['success']
+        if re:
             string = form['task'] + " was added"
         else:
             if form['task'] == "":
                 string = "Please enter something into the box"
             else:
                 string = form['task'] + " already exists"
-        return render_template("home.html", success=string, list=re[1])
+        return render_template("home.html", success=string)
     return render_template("home.html")
 
 
 @app.route('/links', methods=['Get', 'POST'])
 def link():
     global current
+    url = base_url + "add_edge"
+    url_available = base_url + "next_pairs"
     try:
         if request.method == 'POST':
             if request.form.get('yes'):
-                graph_lib.add_edge(current[0], current[1])
-        next_available, first, second = graph_lib.next_pairs()
+                payload = {'name': name, 'vert_from': current[0], 'vert_to': current[1]}
+                r = requests.post(url, json=payload)
+        payload = {'name': name}
+        r = requests.post(url_available, json=payload)
+        next_available = r.json().get("success")
+        first = r.json().get("key_1")
+        second = r.json().get("key_2")
         if next_available:
             current = [first, second]
             return render_template("make_connections.html", first=first, second=second)
@@ -53,10 +65,12 @@ def link():
 
 @app.route('/done')
 def done():
-    global name
-    graph_lib.make_spreadsheet(name)
+    url = base_url + "get_spreadsheet"
+    payload = {"name": name}
+    r = requests.post(url, json=payload)
+    open("static/{}.xlsx".format(name), "wb").write(r.content)
     return render_template("get_spreadsheet.html", link=url_for('static', filename="{}.xlsx".format(name)))
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=14000)
