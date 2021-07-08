@@ -13,5 +13,10 @@
         {% endif %}
         <input type="submit" value="submit" name="submit" id="submit" formaction="/tasks" class="btn btn-primary">
     </form>
+    {% if list is not none %}
+        {% for i in list %}
+            <p>{{ i }}</p>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}

@@ -23,14 +23,14 @@ def tasks():
     if request.method == "POST":
         form = request.form
         re = graph_lib.add_vertex(form['task'])
-        if re:
+        if re[0]:
             string = form['task'] + " was added"
         else:
             if form['task'] == "":
                 string = "Please enter something into the box"
             else:
                 string = form['task'] + " already exists"
-        return render_template("home.html", success=string)
+        return render_template("home.html", success=string, list=re[1])
     return render_template("home.html")
 
 

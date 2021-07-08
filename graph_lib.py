@@ -21,13 +21,13 @@ def new_graph():
 def add_vertex(name):
     global index, li, dic, g
     if name in li or name == "":
-        return False
+        return False, li
     dic[name] = index
     g.add_vertex(index)
     index += 1
     li.append(name)
     create_pot_edges()
-    return True
+    return True, li
 
 
 def create_pot_edges():
