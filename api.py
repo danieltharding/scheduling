@@ -1,8 +1,7 @@
 import igraph
-from flask import Flask, request, jsonify, url_for
 import pandas as pd
+from flask import jsonify
 from math import inf
-import json
 
 graphs = {}
 g = None
@@ -11,17 +10,12 @@ dics = {}
 indices = {}
 pot_edges = {}
 names = []
-app = Flask(__name__)
 
 
-# @app.route('/', methods=["POST", "GET"])
 def get_graph(name, make_new=True):
-    # json = request.get_json(force=True)
-    # name = json.get("name", "")
     if name == "":
         return jsonify({"success": False})
     if name in names:
-        # make_new = json.get("new", False)
         if make_new:
             new_graph(name)
         return jsonify({'success': True, "existed": True})
@@ -39,11 +33,7 @@ def new_graph(name):
     pot_edges[name] = {}
 
 
-# @app.route('/add_vertex', methods=["POST", "GET"])
 def add_vertex(name, new_vertex):
-    # json = request.get_json(force=True)
-    # name = json.get("name", "")
-    # new_vertex = json.get("vertex_name", "")
     if new_vertex in lists[name] or new_vertex == "":
         return jsonify({'success': False})
     dics[name][new_vertex] = indices[name]
@@ -66,12 +56,7 @@ def create_pot_edges(name):
     pot_edges[name] = hold
 
 
-# @app.route("/add_edge", methods=["POST", "GET"])
 def add_edge(vert_from, vert_to, name):
-    # json = request.get_json(force=True)
-    # vert_from = json.get("vert_from", "")
-    # vert_to = json.get("vert_to", "")
-    # name = json.get("name", "")
     if name in graphs.keys():
         if vert_from in dics[name].keys() and vert_to in dics[name].keys():
             boolean = (dics[name][vert_from], dics[name][vert_to]) in graphs[name].get_edgelist()
@@ -87,10 +72,7 @@ def add_edge(vert_from, vert_to, name):
     return jsonify({"success": False, "reason": "Graph doesn't exist"})
 
 
-# @app.route("/next_pairs", methods=["POST", "GET"])
 def next_pairs(name):
-    # json = request.get_json(force=True)
-    # name = json.get("name", "")
     if name not in graphs.keys():
         return jsonify({"success": False, "reason": "graph doesn't exist"})
     if len(pot_edges[name].keys()) == 0 or len(pot_edges[name].keys()) == 1:
@@ -151,7 +133,6 @@ def make_spreadsheet(name):
     df = pd.DataFrame(frame)
     df.to_excel(writer, sheet_name="Sheet 1", index=False)
     formulae(writer, topo, name)
-    writer.save()
     writer.close()
 
 
@@ -209,15 +190,8 @@ def topological(name):
     return re
 
 
-# @app.route("/get_spreadsheet", methods=["GET", "POST"])
 def get_spreadsheet(name):
-    # json = request.get_json(force=True)
-    # name = json.get("name", "")
     if name not in graphs.keys():
         return jsonify({"success": False, "reason": "graph doesn't exist"})
     make_spreadsheet(name)
-    return True
-
-
-if __name__ == "__main__":
-    app.run()
+    return jsonify({'success': True})
