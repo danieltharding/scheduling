@@ -10,15 +10,16 @@ pot_edges = {}
 
 
 def new_graph():
-    global li, dic, index
+    global li, dic, index, pot_edges
     g.delete_vertices(igraph.VertexSeq(g))
     li = []
     dic = {}
     index = 0
+    pot_edges = {}
 
 
 def add_vertex(name):
-    global index
+    global index, li, dic, g
     if name in li or name == "":
         return False
     dic[name] = index
