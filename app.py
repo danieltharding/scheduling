@@ -37,15 +37,18 @@ def tasks():
 @app.route('/links', methods=['Get', 'POST'])
 def link():
     global current
-    if request.method == 'POST':
-        if request.form.get('yes'):
-            graph_lib.add_edge(current[0], current[1])
-    next_available, first, second = graph_lib.next_pairs()
-    if next_available:
-        current = [first, second]
-        return render_template("make_connections.html", first=first, second=second)
-    else:
-        return render_template('make_connections.html', first=None)
+    try:
+        if request.method == 'POST':
+            if request.form.get('yes'):
+                graph_lib.add_edge(current[0], current[1])
+        next_available, first, second = graph_lib.next_pairs()
+        if next_available:
+            current = [first, second]
+            return render_template("make_connections.html", first=first, second=second)
+        else:
+            return render_template('make_connections.html', first=None)
+    except Exception as e:
+        return render_template("Error.html", error=e)
 
 
 @app.route('/done')
