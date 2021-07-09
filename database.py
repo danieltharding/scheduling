@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Column, Boolean, Integer, String, DateTime, Text, Enum, ForeignKey, Index
+from sqlalchemy import event, create_engine, DDL, Column, Boolean, Integer, String, DateTime, Text, Enum, ForeignKey, \
+    Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -9,7 +10,7 @@ class Graphs(Base):
     __tablename__ = "Graphs"
 
     name = Column(String(200), unique=True, primary_key=True)
-    current_index = Column(Integer, default=0)
+    current_index = Column(Integer, server_default="0")
 
     name_to_vertex = relationship("Vertices", back_populates="vertex_to_name")
     name_to_edges = relationship("Edges", back_populates="edges_to_name")
@@ -31,7 +32,7 @@ vertices_index = Index("vertices_index", Vertices.index)
 
 
 class Edges(Base):
-    __tablename__ = "Egdes"
+    __tablename__ = "Edges"
     index_from = Column(Integer, ForeignKey("Vertices.index", ondelete="CASCADE"), default=0, primary_key=True)
     # index_from = Column(Integer, ForeignKey("Vertices.index", ondelete="CASCADE"), default=0, primary_key=True)
     index_to = Column(Integer, ForeignKey("Vertices.index", ondelete="CASCADE"), default=0, primary_key=True)
@@ -41,6 +42,19 @@ class Edges(Base):
     edges_to_name = relationship("Graphs", back_populates="name_to_edges")
     edge_from_index = relationship("Vertices", back_populates="index_from_edge")
     edge_to_index = relationship("Vertices", back_populates="index_to_edge")
+
+
+trigger = DDL('''/
+    CREATE TRIGGER trig AFTER INSERT On Vertices
+    FOR EACH ROW
+    BEGIN
+        Update Graphs
+            set current_index = current_index + 1
+        where name = NEW.name;
+    end;
+''')
+
+event.listen(Vertices, 'after_insert', trigger)
 
 
 def populate_database(user, passw):
@@ -62,8 +76,23 @@ def drop_database(engine):
 
 def create_database(engine):
     engine.execute('CREATE DATABASE scheduling;')
-    engine.execute('USE scheduling;')
+    use(engine)
     Base.metadata.create_all(engine)
+    create_trigger(engine)
+
+
+def use(engine):
+    engine.execute('USE scheduling;')
+
+
+def create_trigger(engine):
+    engine.execute('''CREATE TRIGGER trig AFTER INSERT On Vertices
+        FOR EACH ROW
+        BEGIN
+            Update Graphs
+                set current_index = current_index + 1
+            where name = NEW.name;
+        end;''')
 
 
 if __name__ == "__main__":

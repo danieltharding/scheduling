@@ -2,102 +2,90 @@ import igraph
 import pandas as pd
 from flask import jsonify
 from math import inf
+import database_api as api
 
-graphs = {}
-g = None
-lists = {}
-dics = {}
-indices = {}
 pot_edges = {}
-names = []
 
 
 def get_graph(name, make_new=True):
     if name == "":
         return jsonify({"success": False})
-    if name in names:
-        if make_new:
-            new_graph(name)
-        return jsonify({'success': True, "existed": True})
-    else:
-        names.append(name)
-        new_graph(name)
-        return jsonify({'success': True, "existed": False})
+    api.add_new_graph(name, replace_if_exists=make_new)
+    return jsonify({'success': True})
 
 
 def new_graph(name):
-    graphs[name] = igraph.Graph(directed=True)
-    lists[name] = []
-    dics[name] = {}
-    indices[name] = 0
-    pot_edges[name] = {}
+    r = api.get_all_info(name)
+    if r['exist']:
+        graph = igraph.Graph(n=r['current_index'], directed=True)
+        graph.add_edges(r['edge_list'])
+        return graph
+    return None
 
 
 def add_vertex(name, new_vertex):
-    if new_vertex in lists[name] or new_vertex == "":
-        return jsonify({'success': False})
-    dics[name][new_vertex] = indices[name]
-    graphs[name].add_vertex(indices[name])
-    indices[name] += 1
-    lists[name].append(new_vertex)
-    create_pot_edges(name)
-    return jsonify({"success": True})
+    return jsonify({'success': api.add_new_vertex(name, new_vertex)})
 
 
 def create_pot_edges(name):
+    global pot_edges
+    g = new_graph(name)
     hold = {}
-    vertex_set = igraph.VertexSeq(graphs[name])
+    vertex_set = igraph.VertexSeq(g)
     for i in range(len(vertex_set)):
         for j in range(i + 1, len(vertex_set)):
             hold[(i, j)] = False
             hold[(j, i)] = False
-    for key in pot_edges[name].keys():
-        hold[key] = pot_edges[name][key]
-    pot_edges[name] = hold
+    pot_edges = hold
 
 
 def add_edge(vert_from, vert_to, name):
-    if name in graphs.keys():
-        if vert_from in dics[name].keys() and vert_to in dics[name].keys():
-            boolean = (dics[name][vert_from], dics[name][vert_to]) in graphs[name].get_edgelist()
-            if not boolean and not causes_cycle(name, dics[name][vert_from], dics[name][vert_to]):
-                graphs[name].add_edges([(dics[name][vert_from], dics[name][vert_to])])
-                pot_edges[name][(vert_from, vert_to)] = True
-                return jsonify({"success": True})
-            if boolean:
-                return jsonify({"success": False, "existed": True, "caused-cycle": False})
-            else:
-                return jsonify({"success": False, "caused-cycle": True, "existed": False})
-        return jsonify({"success": False, "reason": "Node doesn't exist"})
-    return jsonify({"success": False, "reason": "Graph doesn't exist"})
+    vert_to_info = api.vertex_exists(name, vert_to)
+    vert_from_info = api.vertex_exists(name, vert_from)
+    if not vert_to_info[0] or not vert_from_info[0]:
+        return jsonify({'success': False})
+    if causes_cycle(name, vert_from_info[1]['index'], vert_to_info[1]['index']):
+        return jsonify({'success': False})
+    return jsonify({'success': api.add_new_edge(name, vert_from, vert_to)})
 
 
 def next_pairs(name):
-    if name not in graphs.keys():
+    g = new_graph(name)
+    if g is None:
         return jsonify({"success": False, "reason": "graph doesn't exist"})
-    if len(pot_edges[name].keys()) == 0 or len(pot_edges[name].keys()) == 1:
+    if len(pot_edges.keys()) == 0 or len(pot_edges.keys()) == 1:
         return jsonify({"success": False, "key_1": "", "key_2": ""})
-    for key in pot_edges[name].keys():
-        if not pot_edges[name][key]:
+    r = api.get_all_info(name)
+    success = False
+    key_1 = ""
+    key_2 = ""
+    for key in pot_edges.keys():
+        if not pot_edges[key]:
             if not causes_cycle(name, key[0], key[1]):
-                return jsonify({"success": True, "key_1": lists[name][key[0]], "key_2": lists[name][key[1]]})
-    return jsonify({"success": False, "key_1": "", "key_2": ""})
+                pot_edges[key] = True
+                success = True
+                key_1 = r['dic'][key[0]]
+                key_2 = r['dic'][key[1]]
+                break
+            else:
+                pot_edges[key] = True
+    return jsonify({"success": success, "key_1": key_1, "key_2": key_2})
 
 
 def causes_cycle(name, i, j):
-    graphs[name].add_edges([(i, j)])
-    re = graphs[name].is_dag()
-    graphs[name].delete_edges([(i, j)])
-    if re:
-        pot_edges[name][(i, j)] = True
+    g = new_graph(name)
+    g.add_edges([(i, j)])
+    re = g.is_dag()
+    g.delete_edges([(i, j)])
     return not re
 
 
 def fill(list_to_fill, name):
-    global li
+    vertex = api.vertex_info(name)
+    lists = vertex['dic']
     re = []
     for element in list_to_fill:
-        re.append(lists[name][element])
+        re.append(lists[element])
     return re
 
 
@@ -155,7 +143,8 @@ def formulae(writer, sorted, name):
 
 
 def ands(element, finished, name):
-    li = graphs[name].predecessors(element)
+    g = new_graph(name)
+    li = g.predecessors(element)
     string = ""
     for i in range(len(li)):
         if i != 0:
@@ -170,8 +159,9 @@ def ands(element, finished, name):
 
 
 def topological(name):
-    search = graphs[name].topological_sorting()
-    shortest_paths = graphs[name].shortest_paths()
+    g = new_graph(name)
+    search = g.topological_sorting()
+    shortest_paths = g.shortest_paths()
     order = 0
     re = {}
     li = [search[0]]
@@ -191,7 +181,16 @@ def topological(name):
 
 
 def get_spreadsheet(name):
-    if name not in graphs.keys():
+    if not api.graph_is_indatabase(name):
         return jsonify({"success": False, "reason": "graph doesn't exist"})
+    # if name not in graphs.keys():
+    #     return jsonify({"success": False, "reason": "graph doesn't exist"})
     make_spreadsheet(name)
     return jsonify({'success': True})
+
+
+if __name__ == "__main__":
+    g = igraph.Graph.Full(3, directed=True)
+    print(igraph.VertexSeq(g))
+    for i in igraph.VertexSeq(g):
+        print(i)
