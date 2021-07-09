@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 current = []
 name = ""
-base_url = "http://localhost:8000/"
+base_url = "http://localhost:5000/"
 
 
 @app.route('/', methods=['GET', 'POST'], endpoint="home")
@@ -67,10 +67,10 @@ def link():
 def done():
     url = base_url + "get_spreadsheet"
     payload = {"name": name}
-    r = requests.post(url, json=payload)
+    r = requests.get(url, json=payload)
     open("static/{}.xlsx".format(name), "wb").write(r.content)
     return render_template("get_spreadsheet.html", link=url_for('static', filename="{}.xlsx".format(name)))
 
 
 if __name__ == "__main__":
-    app.run(port=14000)
+    app.run(port=8000)
