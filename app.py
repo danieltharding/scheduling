@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 import api
 
 app = Flask(__name__)
-# current = []
 
 
 @app.route('/', methods=['GET', 'POST'], endpoint="home")
@@ -41,28 +40,25 @@ def link():
     name = request.cookies.get("name")
     if request.method == "GET":
         api.create_pot_edges(name)
-    # try:
-    if request.method == 'POST':
-        print(request.cookies.get("key_1"))
-        current = [request.cookies.get("key_1"), request.cookies.get("key_2")]
-        if request.form.get('yes'):
-            api.add_edge(current[0], current[1], name)
-    r = api.next_pairs(name)
-    next_available = r.json.get("success")
-    first = r.json.get("key_1")
-    second = r.json.get("key_2")
-    if next_available:
-        current = [first, second]
-        re = make_response(render_template("make_connections.html", first=first, second=second))
-        re.set_cookie("key_1", current[0])
-        re.set_cookie("key_2", current[1])
-        return re
-    else:
-        return render_template('make_connections.html', first=None)
-    # except Exception as e:
-    #     print("HERE")
-    #     print(e)
-    #     return render_template("Error.html", error=e)
+    try:
+        if request.method == 'POST':
+            current = [request.cookies.get("key_1"), request.cookies.get("key_2")]
+            if request.form.get('yes'):
+                api.add_edge(current[0], current[1], name)
+        r = api.next_pairs(name)
+        next_available = r.json.get("success")
+        first = r.json.get("key_1")
+        second = r.json.get("key_2")
+        if next_available:
+            current = [first, second]
+            re = make_response(render_template("make_connections.html", first=first, second=second))
+            re.set_cookie("key_1", current[0])
+            re.set_cookie("key_2", current[1])
+            return re
+        else:
+            return render_template('make_connections.html', first=None)
+    except Exception as e:
+        return render_template("Error.html", error=e)
 
 
 @app.route('/done')
