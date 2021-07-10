@@ -1,7 +1,9 @@
 from sqlalchemy import create_engine
 import database
 
-engine = create_engine("mysql+pymysql://" + "root" + ":" + "sjc93545" + "@localhost/scheduling", echo=False)
+# engine = create_engine("mysql+pymysql://" + "root" + ":" + "sjc93545" + "@localhost/scheduling", echo=False)
+database_url = "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
+engine = create_engine(database_url, echo=False)
 
 
 def add_new_graph(name, replace_if_exists=False):
@@ -17,6 +19,7 @@ def add_new_graph(name, replace_if_exists=False):
 def graph_exists(name):
     result = engine.execute("SELECT current_index FROM Graphs WHERE name = '" + name + "';")
     return result
+
 
 def graph_is_indatabase(name):
     result = graph_exists(name)
@@ -152,11 +155,16 @@ def get_all_info(name):
             if key == "current_index":
                 current_index = value
                 break
-    return {'exist': True, 'current_index':current_index, 'edge_list': edge_stuff['edge_list'], 'set': vertex_stuff['set'], 'dic': vertex_stuff['dic']}
+    return {'exist': True, 'current_index': current_index, 'edge_list': edge_stuff['edge_list'],
+            'set': vertex_stuff['set'], 'dic': vertex_stuff['dic']}
+
+
+def database_setup():
+    database.create_database(engine)
 
 
 if __name__ == "__main__":
-    database.populate_database("root", "sjc93545")
+    # database.populate_database("root", "sjc93545")
     add_new_graph("one")
     add_new_graph("one")
     add_new_vertex("one", "One")

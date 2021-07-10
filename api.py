@@ -189,6 +189,9 @@ def get_spreadsheet(name):
     return jsonify({'success': True})
 
 
+def db_setup():
+    api.database_setup()
+
 if __name__ == "__main__":
     g = igraph.Graph.Full(3, directed=True)
     print(igraph.VertexSeq(g))

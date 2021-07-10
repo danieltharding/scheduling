@@ -2,8 +2,11 @@ from sqlalchemy import event, create_engine, DDL, Column, Boolean, Integer, Stri
     Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+import os
 
 Base = declarative_base()
+SQLALCHEMY_DB_URL = "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
+databse_name = "zohis47bslyjovcl"
 
 
 class Graphs(Base):
@@ -61,28 +64,30 @@ def populate_database(user, passw):
     print('Creating engine...')
     db_engine = create_database_engine(user, passw)
     print('Creating database and tables...')
-    drop_database(db_engine)
+    # drop_database(db_engine)
     create_database(db_engine)
 
 
 def create_database_engine(user, passw):
     engine = create_engine("mysql+pymysql://" + user + ":" + passw + "@localhost", echo=False)
+    engine = create_engine(SQLALCHEMY_DB_URL)
     return engine
 
 
 def drop_database(engine):
-    engine.execute('DROP DATABASE IF EXISTS scheduling;')
+    # engine.execute('DROP DATABASE IF EXISTS {};'.format(databse_name))
+    return
 
 
 def create_database(engine):
-    engine.execute('CREATE DATABASE scheduling;')
+    # engine.execute('CREATE DATABASE {};'.format(databse_name))
     use(engine)
     Base.metadata.create_all(engine)
     create_trigger(engine)
 
 
 def use(engine):
-    engine.execute('USE scheduling;')
+    engine.execute('USE {};'.format(databse_name))
 
 
 def create_trigger(engine):
