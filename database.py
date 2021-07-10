@@ -2,11 +2,15 @@ from sqlalchemy import event, create_engine, DDL, Column, Boolean, Integer, Stri
     Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from dotenv import load_dotenv
 import os
 
+
 Base = declarative_base()
-SQLALCHEMY_DB_URL = "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
-databse_name = "zohis47bslyjovcl"
+load_dotenv()
+SQLALCHEMY_DB_URL = os.getenv("DB_CONN")
+# "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
+# databse_name = "zohis47bslyjovcl"
 
 
 class Graphs(Base):
@@ -81,16 +85,17 @@ def drop_database(engine):
 
 def create_database(engine):
     # engine.execute('CREATE DATABASE {};'.format(databse_name))
-    use(engine)
+    # use(engine)
     Base.metadata.create_all(engine)
     create_trigger(engine)
 
 
-def use(engine):
-    engine.execute('USE {};'.format(databse_name))
+# def use(engine):
+    # engine.execute('USE {};'.format(databse_name))
 
 
 def create_trigger(engine):
+    engine.execute()
     engine.execute('''CREATE TRIGGER trig AFTER INSERT On Vertices
         FOR EACH ROW
         BEGIN

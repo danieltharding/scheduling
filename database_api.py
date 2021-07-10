@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
 import database
+from dotenv import load_dotenv
+import os
 
 # engine = create_engine("mysql+pymysql://" + "root" + ":" + "sjc93545" + "@localhost/scheduling", echo=False)
-database_url = "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
+load_dotenv()
+database_url = os.getenv("DB_CONN")
 engine = create_engine(database_url, echo=False)
 
 
