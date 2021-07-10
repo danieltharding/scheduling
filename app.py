@@ -4,9 +4,9 @@ import api
 app = Flask(__name__)
 
 
-@app.before_first_request
-def setup():
-    api.db_setup()
+# @app.before_first_request
+# def setup():
+#     api.db_setup()
 
 
 @app.route('/', methods=['GET', 'POST'], endpoint="home")
