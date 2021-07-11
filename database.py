@@ -5,12 +5,11 @@ from sqlalchemy.orm import relationship
 from dotenv import load_dotenv
 import os
 
-
 Base = declarative_base()
 load_dotenv()
 SQLALCHEMY_DB_URL = os.getenv("DB_CONN")
-# "mysql+pymysql://p5rs0n8ml1amynog:cs187til91cux7wd@s465z7sj4pwhp7fn.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/zohis47bslyjovcl"
 # databse_name = "zohis47bslyjovcl"
+database_name = "scheduling"
 
 
 class Graphs(Base):
@@ -21,6 +20,7 @@ class Graphs(Base):
 
     name_to_vertex = relationship("Vertices", back_populates="vertex_to_name")
     name_to_edges = relationship("Edges", back_populates="edges_to_name")
+    name_to_pot_edges = relationship("Pot_edges", back_populates="pot_edges_to_name")
 
 
 class Vertices(Base):
@@ -51,51 +51,47 @@ class Edges(Base):
     edge_to_index = relationship("Vertices", back_populates="index_to_edge")
 
 
-trigger = DDL('''/
-    CREATE TRIGGER trig AFTER INSERT On Vertices
-    FOR EACH ROW
-    BEGIN
-        Update Graphs
-            set current_index = current_index + 1
-        where name = NEW.name;
-    end;
-''')
+class Pot_Edges(Base):
+    __tablename__ = "Pot_edges"
 
-event.listen(Vertices, 'after_insert', trigger)
+    name = Column(String(200), ForeignKey("Graphs.name", ondelete="CASCADE"), primary_key=True)
+    edges = Column(Text)
+
+    pot_edges_to_name = relationship("Graphs", back_populates="name_to_pot_edges")
 
 
-def populate_database(user, passw):
+def populate_database():
     print('Creating engine...')
-    db_engine = create_database_engine(user, passw)
+    db_engine = create_database_engine()
     print('Creating database and tables...')
-    # drop_database(db_engine)
+    drop_database(db_engine)
     create_database(db_engine)
 
 
-def create_database_engine(user, passw):
-    engine = create_engine("mysql+pymysql://" + user + ":" + passw + "@localhost", echo=False)
+def create_database_engine():
     engine = create_engine(SQLALCHEMY_DB_URL)
     return engine
 
 
 def drop_database(engine):
-    # engine.execute('DROP DATABASE IF EXISTS {};'.format(databse_name))
+    engine.execute("DROP TABLE Pot_edges")
+    engine.execute("DROP TABLE Edges")
+    engine.execute("DROP TABLE Vertices")
+    engine.execute("DROP TABLE Graphs")
     return
 
 
 def create_database(engine):
-    # engine.execute('CREATE DATABASE {};'.format(databse_name))
-    # use(engine)
+    use(engine)
     Base.metadata.create_all(engine)
     create_trigger(engine)
 
 
-# def use(engine):
-    # engine.execute('USE {};'.format(databse_name))
+def use(engine):
+    engine.execute('USE {};'.format(database_name))
 
 
 def create_trigger(engine):
-    engine.execute()
     engine.execute('''CREATE TRIGGER trig AFTER INSERT On Vertices
         FOR EACH ROW
         BEGIN
@@ -103,9 +99,15 @@ def create_trigger(engine):
                 set current_index = current_index + 1
             where name = NEW.name;
         end;''')
+    engine.execute('''
+    CREATE TRIGGER trig2 AFTER INSERT ON Graphs
+    FOR EACH ROW 
+    BEGIN 
+        INSERT INTO Pot_edges (`name`, edges) VALUE (NEW.name, '');
+    end;
+        
+''')
 
 
 if __name__ == "__main__":
-    username = "root"
-    password = "sjc93545"
-    populate_database(username, password)
+    populate_database()

@@ -4,7 +4,6 @@ from flask import jsonify
 from math import inf
 import database_api as api
 
-pot_edges = {}
 
 
 def get_graph(name, make_new=True):
@@ -28,7 +27,6 @@ def add_vertex(name, new_vertex):
 
 
 def create_pot_edges(name):
-    global pot_edges
     g = new_graph(name)
     hold = {}
     vertex_set = igraph.VertexSeq(g)
@@ -36,7 +34,10 @@ def create_pot_edges(name):
         for j in range(i + 1, len(vertex_set)):
             hold[(i, j)] = False
             hold[(j, i)] = False
-    pot_edges = hold
+    pot_edges = api.get_potential_edges(name)
+    for key in pot_edges.keys():
+        hold[key] = pot_edges[key]
+    return hold
 
 
 def add_edge(vert_from, vert_to, name):
@@ -53,6 +54,7 @@ def next_pairs(name):
     g = new_graph(name)
     if g is None:
         return jsonify({"success": False, "reason": "graph doesn't exist"})
+    pot_edges = create_pot_edges(name)
     if len(pot_edges.keys()) == 0 or len(pot_edges.keys()) == 1:
         return jsonify({"success": False, "key_1": "", "key_2": ""})
     r = api.get_all_info(name)
@@ -69,6 +71,7 @@ def next_pairs(name):
                 break
             else:
                 pot_edges[key] = True
+    api.add_potential_edges(name, pot_edges)
     return jsonify({"success": success, "key_1": key_1, "key_2": key_2})
 
 
