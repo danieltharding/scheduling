@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import database
 from dotenv import load_dotenv
+import ast
 import os
 
 load_dotenv()
@@ -16,6 +17,7 @@ def add_new_graph(name, replace_if_exists=False):
         else:
             return
     engine.execute("INSERT INTO Graphs (name) VALUES ('" + name + "');")
+
 
 
 def graph_exists(name):
@@ -159,6 +161,23 @@ def get_all_info(name):
                 break
     return {'exist': True, 'current_index': current_index, 'edge_list': edge_stuff['edge_list'],
             'set': vertex_stuff['set'], 'dic': vertex_stuff['dic']}
+
+
+def add_potential_edges(name, pot_edges):
+    string = str(pot_edges)
+    engine.execute("UPDATE Pot_edges SET edges = '" + string + "' WHERE name = '" + name + "';")
+
+
+def get_potential_edges(name):
+    result = engine.execute("SELECT edges FROM Pot_edges WHERE name = '" + name + "';")
+    potential_edges = {}
+    for row in result:
+        for key, value in row._mapping.items():
+            if key == "edges":
+                if value != "":
+                    potential_edges = ast.literal_eval(value)
+                return potential_edges
+    return potential_edges
 
 
 def database_setup():
