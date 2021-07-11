@@ -3,7 +3,6 @@ import database
 from dotenv import load_dotenv
 import os
 
-# engine = create_engine("mysql+pymysql://" + "root" + ":" + "sjc93545" + "@localhost/scheduling", echo=False)
 load_dotenv()
 database_url = os.getenv("DB_CONN")
 engine = create_engine(database_url, echo=False)
