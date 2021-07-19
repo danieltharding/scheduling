@@ -5,7 +5,6 @@ from math import inf
 import database_api as api
 
 
-
 def get_graph(name, make_new=True):
     if name == "":
         return jsonify({"success": False})
@@ -96,14 +95,22 @@ def get_data_frame(dic, name):
     re = {}
     i = 0
     for key in dic.keys():
-        re[key] = fill(dic[key], name)
-        re["Can Start {}?".format(i)] = []
+        new_key = f'Task set {i + 1}'
+        re[new_key] = fill(dic[key], name)
+        re["Can Start {}?".format(i + 1)] = []
         if i == 0:
             for j in range(len(dic[key])):
-                re["Can Start {}?".format(i)].append("Yes")
-        re["Finished {}".format(i)] = []
+                re["Can Start {}?".format(i + 1)].append("Yes")
+        re["Finished {}".format(i + 1)] = []
         i += 1
-    return correct_length(re)
+    max_length = []
+    for key in re.keys():
+        start_length = 9
+        for e in re[key]:
+            if len(e) > start_length:
+                start_length = len(e)
+        max_length.append(start_length)
+    return correct_length(re), max_length
 
 
 def correct_length(dic):
@@ -119,11 +126,18 @@ def correct_length(dic):
 
 def make_spreadsheet(name):
     topo = topological(name)
-    frame = get_data_frame(topo, name)
+    frame, max_length = get_data_frame(topo, name)
     writer = make_file(name)
     df = pd.DataFrame(frame)
     df.to_excel(writer, sheet_name="Sheet 1", index=False)
     formulae(writer, topo, name)
+    workbook = writer.book
+    format = workbook.add_format()
+    format.set_align('center')
+    worksheet = writer.sheets['Sheet 1']
+    for i in range(len(max_length)):
+        char = chr(ord('A') + i)
+        worksheet.set_column(f'{char}:{char}', max_length[i], format)
     writer.close()
 
 
@@ -194,6 +208,7 @@ def get_spreadsheet(name):
 
 def db_setup():
     api.database_setup()
+
 
 if __name__ == "__main__":
     g = igraph.Graph.Full(3, directed=True)
